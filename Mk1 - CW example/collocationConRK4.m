@@ -1,4 +1,4 @@
-function [C,Ceq] = collocationConRK4(XU,fun,args,shapes,setConds)
+function [C,Ceq] = collocationConRK4(XU,fun,args,shapes)
 %collocationConRK4 Hermite Simpson Collocation
 % 
 %Inputs:
@@ -25,9 +25,6 @@ u=XU(((rx*cx)+1):end);
 X=reshape(x,rx,cx);
 T=X(end,:);
 
-%Set the time bounds 
-T(1)=setConds(1,end);
-%T(end)=setConds(2,end);
 
 %Calcualte the time step and force even time steps
 hk=diff(T);
@@ -36,10 +33,6 @@ tMid=T(2:end-1);
 tLow=T(1:end-2);
 tErr=((tMid-tLow)./(tHi-tLow))-.5;
 tErr=[tErr,((T(end)-T(end-1))./(T(end)-T(end-2)))-.5];
-
-%set the hard initial and final steps
-X(1:5,1)=setConds(1,1:5)';
-X(1:4,end)=setConds(2,1:4)';
 
 U=reshape(u,ru,cu);
 uLow=U(:,1:end-1);

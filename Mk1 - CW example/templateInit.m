@@ -32,7 +32,7 @@ n=sqrt(mu/(a^3))*tStar
 
 args=[c1,c2,n];
 
-entries=100%500
+entries=65%500
 t0=0
 %tof=1000/tStar
 tof=1000/tStar
@@ -80,7 +80,7 @@ heightIG=interp1(tAct,X(2,:),tSpan,'spline');
 
 
 
-%% Enforcing forward Time
+%% Enforcing forward Time and intial and final states
 statesPerEntry=entries*(numStates+numControls+1);
 A=zeros(entries,statesPerEntry);
 for c=1:entries-1
@@ -92,11 +92,18 @@ for c=1:entries-1
         end
     end
 end
+
 A=sparse(A);
 B=-ones(entries,1)*eps;
-Aeq=[];
-Beq=[];
-linear={A,B,Aeq,Beq};
+Aeq=zeros(5+1+4,statesPerEntry);
+for c=1:6 %Enfocing intial state and time
+    Aeq(c,c)=1;
+end
+for c=1:4 %enforcing final state
+    Aeq(6+c,((entries-1)*(numStates+1))+c)=1;
+end
+Beq=[x0';t0;xf(1:4)'];
+linear={A,B,sparse(Aeq),Beq};
 
 %% Forming the Bounds
 uBDS=[Inf,Inf,Inf,Inf,1.01,Inf]
@@ -108,7 +115,7 @@ bds={repmat(lBDS',1,entries),repmat(uBDS',1,entries),repmat(lBDC',1,entries),rep
 fun=@(x,u,args)dynamicsTemplate(x,u,args)
 
 %% Solving the Optimal Control Problem
-[X,U,tAct, Fval, ExitFlag, Output]=fminconWrapper(X,U,fun,args,bds,setConds,linear);
+[X,U,tAct, Fval, ExitFlag, Output]=fminconWrapper(X,U,fun,args,bds,linear);
 %assert(ExitFlag==1, 'The solver did not find a feasable solution')
 
 

@@ -1,4 +1,4 @@
-function [xSoln,uSoln,tSoln, Fval, ExitFlag, Output] = fminconWrapper(X,U,fun,args,bds,setConds,linear)
+function [xSoln,uSoln,tSoln, Fval, ExitFlag, Output] = fminconWrapper(X,U,fun,args,bds,linear)
 %fminconWrapper Wrapper around fmincon
 % 
 %Inputs:
@@ -45,12 +45,12 @@ Beq=linear{4};
 
 %Choose the cost function and nonlinear Constraints
 costFun = @(x)costFunctionMf(x,shapes);
-nonlCon = @(x)collocationConRK4(x,fun,args,shapes,setConds);
+nonlCon = @(x)collocationConRK4(x,fun,args,shapes);
 
 
 
 %Setup the problem object
-options = optimoptions('fmincon','Display','iter','Algorithm','interior-point','OptimalityTolerance',1e-4,'MaxFunctionEvaluations',1*21000);
+options = optimoptions('fmincon','Display','iter','Algorithm','sqp','OptimalityTolerance',1e-4,'MaxFunctionEvaluations',3*21000);
 Problem.objective = costFun;
 Problem.x0 = XU;
 Problem.Aineq = A;
